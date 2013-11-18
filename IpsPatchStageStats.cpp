@@ -1,0 +1,41 @@
+#include "IpsMultiContact.h"
+#include "mf.h"
+
+using namespace std;
+
+int IPSMultiContact::Convert(simplmat <double> &data)
+{
+	int dx,dy;
+	dx = data.getRows();
+	dy = data.getCols();
+
+	if( dx!=DimX || dy!=DimY )
+		data.resize(DimX, DimY, 0.0);
+		
+	for(dy=0;dy<DimY; dy++)
+		for(dx=0;dx<DimX; dx++)
+			data(dx,dy) = C(dx,dy).Specie;
+
+	return 1;
+}
+
+
+int IPSMultiContact::PStats(simplmat <double> &data, const char * outFile, const char * ident)
+{
+	// return PatchStats(data,NumSpecies,outFile,ident);
+	return 0;
+}
+
+int IPSMultiContact::MFStats(simplmat <double> &data, simplmat <double> &q,
+	int minBox, int maxBox, int deltaBox,const char * outFile,const char * ident)
+{
+	return 	MultifractalSBA(data, q,const_cast<char *>(outFile) ,minBox, maxBox, deltaBox, 'S',const_cast<char *>(ident));
+}
+
+
+int IPSMultiContact::MIStats(simplmat <double> &data, const char * outFile,const char * ident)
+{
+	// return MoranIRook(data, outFile, ident);
+	return 0;
+}
+
