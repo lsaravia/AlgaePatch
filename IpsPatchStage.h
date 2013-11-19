@@ -39,8 +39,8 @@ class SpeciePatchStage
 	float GrowthRate;					// From small patch to big patch
 	float ColonizationRate;				// Bigs produce colonizers
 	float ExtinctionRate;				// Small patch extinction
-	float PerturbationRate;				// Big patchs to small
-	float CompetitionRate;				// Big patchs can displace small patchs of other species with greater index
+	float PerturbationRate;				// Big patches to small
+	float CompetitionRate;				// Big patches can displace small patchs of other species with greater index
 	unsigned DispersalDistance;
 
 	SpeciePatchStage() { Init(); };
