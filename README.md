@@ -1,5 +1,5 @@
 
-# Spatial stochastic Patch model for algae with 2 stages
+# Spatial stochastic Patch model with 2 stages
 
 The principal process is in the file IpsPatchStage.cpp the functions:
 
