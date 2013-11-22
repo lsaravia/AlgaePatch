@@ -16,7 +16,7 @@ class CellPatchStage
 	int Specie;
 	int Stage;
 
-	CellPatchStage() { Specie=0; Stage=0};
+	CellPatchStage() { Specie=0; Stage=0;};
 	int & Elem() { return Specie; };
 
 	const CellPatchStage & Elem( int nsp, int stg ) {
@@ -28,7 +28,7 @@ class CellPatchStage
 								Stage = src.Stage;
 								return *this;};
 
-	CellPatchStage(const CellPatchStage &src){ Specie = src.Specie; Stage=src.Stage };
+	CellPatchStage(const CellPatchStage &src){ Specie = src.Specie; Stage=src.Stage; };
 
 };
 
@@ -71,6 +71,7 @@ class IPSPatchStage : public CABase
 		CellPatchStage ActualCell ;
         double GlobalRate;
         int NumEvaluations;
+        bool PrimeraEval; 
         Ranf1 ran;
 	public:
 
@@ -82,6 +83,8 @@ class IPSPatchStage : public CABase
 
 	void ReadSetSeed( char * fname);
 	void RandomSetSeed(int sp,unsigned age, int no, int minX);
+	int Rand(int num);
+	double Rand();
 
 	void Evaluate();
 	void EvalCell(int x,int y);
@@ -94,19 +97,23 @@ class IPSPatchStage : public CABase
 
 	int ReadSeed( char * fname, int mode);
 	int ReadSeed( char * fname){return ReadSeed( fname,0 );};
-	int ReadIdrisi( char * fname, int mode=0);
 
 	int SaveSeed( const char * fname);
-
-	int PStats(simplmat <double> &data, const char * outFile, const char * ident);
 
 	int Convert(simplmat <double> &data);                                      // Convierte a simplmat
 	
 	int MFStats(simplmat <double> &data, simplmat <double> &q,
 						int minBox, int maxBox, int deltaBox,const char * outFile,const char * ident);
-						
-	int MIStats(simplmat <double> &data, const char * outFile, const char * ident);       // Moran's I Rook 
-						
+									
 };
+
+inline double IPSPatchStage::Rand() { 
+	return ran.doub(); 
+	};
+
+inline int IPSPatchStage::Rand(int num) {
+		return (ran.int64() % (num+1)); // between 0 and num inclusive 
+		//return ignuin(0,num);
+        };
 
 #endif // __PatchStage_H

@@ -1,9 +1,9 @@
-#include "IpsMultiContact.h"
+#include "IpsPatchStage.h"
 #include "mf.h"
 
 using namespace std;
 
-int IPSMultiContact::Convert(simplmat <double> &data)
+int IPSPatchStage::Convert(simplmat <double> &data)
 {
 	int dx,dy;
 	dx = data.getRows();
@@ -20,22 +20,11 @@ int IPSMultiContact::Convert(simplmat <double> &data)
 }
 
 
-int IPSMultiContact::PStats(simplmat <double> &data, const char * outFile, const char * ident)
-{
-	// return PatchStats(data,NumSpecies,outFile,ident);
-	return 0;
-}
-
-int IPSMultiContact::MFStats(simplmat <double> &data, simplmat <double> &q,
+int IPSPatchStage::MFStats(simplmat <double> &data, simplmat <double> &q,
 	int minBox, int maxBox, int deltaBox,const char * outFile,const char * ident)
 {
 	return 	MultifractalSBA(data, q,const_cast<char *>(outFile) ,minBox, maxBox, deltaBox, 'S',const_cast<char *>(ident));
 }
 
 
-int IPSMultiContact::MIStats(simplmat <double> &data, const char * outFile,const char * ident)
-{
-	// return MoranIRook(data, outFile, ident);
-	return 0;
-}
 

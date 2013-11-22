@@ -7,7 +7,7 @@
 
 #include "IpsPatchStage.h"
 #include "bgi.hpp"
-#include "fortify.h"
+//#include "fortify.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -44,6 +44,8 @@ void IPSPatchStage::Evaluate()
     if( privez )
     {
         double gr1=0;
+        // Find the maximun rate 
+        //
         for(i=0; i<NumSpecies; i++)
             gr1 = (Sp[i].ExtinctionRate) > gr1 ? (Sp[i].ExtinctionRate) : gr1;
 
@@ -92,7 +94,7 @@ void IPSPatchStage::EvalCell(int x,int y)
     int actSp = C(x,y).Specie;
 	int actSt = C(x,y).Stage;
 	double rnd = Rand();
-    int dx,dy,dd,dis,x1,y1,i;
+    int dx,dy,dd,dis,x1,y1;
 
 
 	// Colonization from the exterior
@@ -100,7 +102,7 @@ void IPSPatchStage::EvalCell(int x,int y)
 
 	if(actSp>0)
 	{
-        If(actSt==0)
+        if(actSt==0)
         {
             if(rnd<Sp[actSp].ExtinctionRate)
                     C(x,y).Specie=0;
@@ -127,7 +129,7 @@ void IPSPatchStage::EvalCell(int x,int y)
                 {
                     if(C(x1,y1).Stage==0 )
                     {
-                        rnd = Rand()
+                        rnd = Rand();
                         if(rnd<Sp[actSp].GrowthRate)
                             C(x1,y1).Stage=1;     // Pass to stage 1
                     }
@@ -136,9 +138,9 @@ void IPSPatchStage::EvalCell(int x,int y)
                 {
                     if(C(x1,y1).Stage==0 )
                     {
-                        rnd = Rand()
+                        rnd = Rand();
                         if(rnd<Sp[actSp].CompetitionRate)
-                            C(x1,y1).Species=actSp;     // Actual specie replace target specie
+                            C(x1,y1).Specie=actSp;     // Actual specie replace target specie
                     }
 
                 }

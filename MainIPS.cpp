@@ -7,7 +7,7 @@
 #include <sstream>
 #include <fstream>
 #include <string>
-#include "IpsMultiContact.h"
+#include "IpsPatchStage.h"
 #include "bgi.hpp"
 
 using namespace std;
@@ -41,7 +41,7 @@ int main(int argc, char * argv[])
 {
 	IPSParms p;
 	
-	IPSMultiContact ca;
+	IPSPatchStage ca;
 
 	if( argc > 1 )
 		{
@@ -106,7 +106,7 @@ int main(int argc, char * argv[])
 					name << p.baseName << (i+1) << ".sed" << ends;
 					ca.SaveSeed( name.str().c_str() );
 					}
-				if( p.mfDim='S' && (i+1)>=p.init)
+				if( p.mfDim=='S' && (i+1)>=p.init)
 					{
 					ostringstream name,nam1;
 					name << p.baseName << "mf.txt" << ends;

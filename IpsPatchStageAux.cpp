@@ -1,54 +1,46 @@
 //
 // Funciones Auxiliares
 //
-//#pragma implementation
-
 #include <stdio.h>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
-#include "IpsMultiContact.h"
-#include "fortify.h"
 #include <ctype.h>
-#ifdef __GNUG__
-extern int getch(void);
-extern int getkey(void);
-extern int kbhit(void);
-#else
-#include <conio.h>
-#include <pc.h>
-#endif
 #include <time.h>
+#include "grxkeys.h"
 #include "bgi.hpp"
+#include "RWFile.h"
+#include "IpsPatchStage.h"
+
 
 #define uchar unsigned char
 
 using namespace std;
 
-int SpecieMultiContact::Scan(char * buff)
+int SpeciePatchStage::Scan(char * buff)
 	{
 	int sp=0;
 	istringstream ins(buff);
-	ins >> sp >> BirthRate
-				>> MortalityRate
-				>> DispersalDistance
-				>> ColonizationRate ;
-//			  >> PDetachment >> DetachmentDistance >> DetachmentTreshold
-//			  >> DispersalNorm;
+	ins >> sp >> GrowthRate >>			
+				ColonizationRate >>		
+				ExtinctionRate >>		
+				PerturbationRate >>		
+				CompetitionRate >>		
+				DispersalDistance;
 	return sp;
 	}
 
 
-void IPSMultiContact::Reset()
+void IPSPatchStage::Reset()
 	{
-	C.fill( ActualCell.Elem(0) );
+	C.fill( ActualCell.Elem(0,0) );
 	A = 0;
 	N = 1;
 	T = 0;
-//	ActualSp = 0;
+	PrimeraEval=true;
 	}
 
-int IPSMultiContact::ReadParms( long rndSeed, char * file )
+int IPSPatchStage::ReadParms( long rndSeed, char * file )
 	{
 	ifstream in;
 	char buff[255];
@@ -69,24 +61,24 @@ int IPSMultiContact::ReadParms( long rndSeed, char * file )
 
 	Init( NumSpecies, DimX, DimY, rndSeed);
 
-	in.getline(buff,255);
-
-	for(int i=0;i<NumSpecies;i++)
+	// Read the species parameters starting at 1 
+	
+	for(int i=1;i<=NumSpecies;i++)
 		{
 		in.getline(buff,254);
 		sp = Sp[i].Scan(buff);
-		if( sp>=NumSpecies || sp!=i )
+		if( sp>NumSpecies || sp!=i )
 			{
-			cerr << "Error reading parameter file.\n";
+			cerr << "Error reading species (inp) parameter file.\n";
 			return 1;
 			}
-
 		}
+
 	return 0;
 	}
 
 
-void IPSMultiContact::ReadSetSeed(char * file)
+void IPSPatchStage::ReadSetSeed(char * file)
 	{
 	FILE *in;
 	char buff[255];
@@ -116,7 +108,7 @@ void IPSMultiContact::ReadSetSeed(char * file)
 //
 //	mode == 1 -> Lee sin modelo
 //	
-int IPSMultiContact::ReadSeed(char * fname,int mode)
+int IPSPatchStage::ReadSeed(char * fname,int mode)
 	{
 	FILE *in;
 	char buff[256];
@@ -147,14 +139,17 @@ int IPSMultiContact::ReadSeed(char * fname,int mode)
 		Sp = NULL;
 		}
 
+	// If type SP or BI read species
+	// if type ST read stages
+	//
 	while( fgets(buff,4,in)!= NULL )
 		{
 		if( strncmp(buff,"SP",2)==0 )
 			tipo = 0;
-		else if(strncmp(buff,"AG",2)==0 )
+		else if(strncmp(buff,"ST",2)==0 )
 			tipo = 1;
 		else if(strncmp(buff,"BI",2)==0 )
-			tipo = 3;
+			tipo = 0;
 		else
 			continue;
 
@@ -169,16 +164,13 @@ int IPSMultiContact::ReadSeed(char * fname,int mode)
 					}
 
 				switch (tipo) {
-//					case 0:
-//						C(dx,dy).Elem(A) = spe;
-//						break;
-//					case 1:
-//						C(dx,dy).Age = spe;
-//						break;
-					case 3:
-						C(dx,dy).Elem() = spe;
+					case 0:
+						C(dx,dy).Specie = spe;
 						if( spe>maxSpe )
 							maxSpe = spe;
+						break;
+					case 1:
+						C(dx,dy).Stage = spe;
 						break;
 
 					default:
@@ -208,7 +200,7 @@ int IPSMultiContact::ReadSeed(char * fname,int mode)
 	}
 
 
-int IPSMultiContact::SaveSeed(const char * fname)
+int IPSPatchStage::SaveSeed(const char * fname)
 	{
 	int i,j;
 	ofstream sav( fname );
@@ -233,7 +225,7 @@ int IPSMultiContact::SaveSeed(const char * fname)
 	return 0;
 	}
 
-void IPSMultiContact::InitGraph(char * idrPal)
+void IPSPatchStage::InitGraph(char * idrPal)
 {
 	IGraph(DimX,DimY,idrPal);
 	char buff[20];
@@ -242,12 +234,13 @@ void IPSMultiContact::InitGraph(char * idrPal)
 	{
 		sprintf(buff,"%d",i);
 		GLabel(buff,i);
+		if(i>10) break;
 	}
 	
 //  	BLabel();
 }
 
-void IPSMultiContact::PrintGraph()
+void IPSPatchStage::PrintGraph()
 	{
 	char sa, baseName[9];
 	ostringstream name;
@@ -262,35 +255,31 @@ void IPSMultiContact::PrintGraph()
 			PPix(i,j,sp);
 			}
 		}
-    if( privez )
-    {
-    	getchar();
-        privez = false;
-    }
-    
-/*	if( kbhit() )
+
+	if( GrKeyPressed() )
 		{
-		sa=toupper(getch());
+		int sa=toupper(GrKeyRead());
 		if( sa=='S')
 			{
 			EndGraph();
 			cerr << "Tiempo :" << T << endl;
 			cerr << "Ingrese nombre BASE de archivo : ";
-			cin.width(6);
-			cin >> baseName;
-			name << baseName << T << ".sed" << ends;
+//			cin.width(6);
+//			cin >> baseName;
+			name << "ipsNeutral" << T << ".sed" << ends;
 			SaveSeed( name.str().c_str() );
 			InitGraph();
 			}
-		else
-			getch();
+		else if( sa=='Q')
+			exit(1);
+			
 		}
-	//getch();
-	*/
-	 
 	}
 
-void IPSMultiContact::RandomSetSeed(int sp,unsigned age, int no, int minX)
+
+// Distribute species at random. Species index start in 1
+// 
+void IPSPatchStage::RandomSetSeed(int sp,unsigned age, int no, int minX)
 	{
 	int rx,ry;
 	int i;
@@ -305,7 +294,7 @@ void IPSMultiContact::RandomSetSeed(int sp,unsigned age, int no, int minX)
 			ry=Rand(DimY-1);
 			if( C(rx,ry).Elem() == 0 )
 				{
-				C(rx,ry).Elem() = sp+1;
+				C(rx,ry).Elem() = sp;
 //				C(rx,ry).Age = age;
 				break;
 				}
@@ -314,12 +303,13 @@ void IPSMultiContact::RandomSetSeed(int sp,unsigned age, int no, int minX)
 	}
 
 
-int  IPSMultiContact::PrintDensity(char *fname,char *iname)
+int  IPSPatchStage::PrintDensity(char *fname,char *iname)
 {
 	fstream dout;
-	static int privez=0;
-	double tot=0,totBio=0,totCells=DimX*DimY;
-	double * den = new double[NumSpecies];
+	static bool privez=true;
+	double tot=0,totBio=0,totCells=DimX*DimY,freq=0.0;
+	simplmat <double> den(NumSpecies+1);
+	simplmat <double> stg(NumSpecies+1);
 	int a,i;
 
 	if( fname!=NULL )
@@ -347,154 +337,62 @@ int  IPSMultiContact::PrintDensity(char *fname,char *iname)
 
 	if( privez )
 	{
-		privez=0;
-		dout << "Class";
-		for( a=0; a<NumSpecies; a++)
+		privez=false;
+		dout << "Specie";
+		for( a=1; a<=NumSpecies; a++)
 			{
 			//dout.width(6);
-			dout <<  "\t" << (a+1);
+			dout <<  "\t" << a;
 			}
-		dout << "\tTot.Dens\tTot.Num" << endl;
-		}
+		dout << "\tTot.Dens\tTot.Num" ;
 
-	for(i=0; i<NumSpecies; i++)
-		den[i]=0;
+		// Proportion of stages (big/total patches)
+		for( a=1; a<=NumSpecies; a++)
+			{
+			//dout.width(6);
+			dout <<  "\t" << a;
+			}
+
+		dout << "\tProp.Big" << endl;
+		}
+	den.fill(0.0);
+	stg.fill(0.0);
 
 	for(i=0; i<DimY; i++)
 		for(int j=0;j<DimX;j++)
-			{
-			a = C(j,i).Elem();
+		{
+			a = C(j,i).Specie;
 			if( a>0 )
-				den[ a-1 ]++;
+			{
+				den(a)++;
+				if(C(j,i).Stage>0)		// Sum big patches = stage 1
+					stg(a)++;
 			}
+		}
 	if( iname==NULL )
 		dout << T ;
 	else
 		dout << iname << "\t" << T ;
 
-	for( i=0; i<NumSpecies; i++)
+	for( i=1; i<=NumSpecies; i++)
 		{
-		dout << "\t" << den[i]/totCells;
-		tot+= den[i];
-		totBio+= den[i]/totCells;
+		freq = den(i)/totCells;
+		dout << "\t" << freq;
+		tot+= den(i);
+		totBio+= freq;
 		}
-	dout << "\t" << totBio <<  "\t" << tot << endl;
+	dout << "\t" << totBio <<  "\t" << tot;
 
-	delete []den;
+	totBio = 0;
+	for( i=1; i<=NumSpecies; i++)
+		{
+		freq = stg(i)/den(i);
+		dout << "\t" << freq;
+		totBio+= stg(i);
+		}
+	totBio = totBio/tot;
+	dout << "\t" << totBio <<  endl;
 	dout.close();
 	return tot;
 	};
-
-int IPSMultiContact::ReadIdrisi( char * fname, int mode )
-	{
-	ostringstream dname,iname;
-	dname << fname << ".rdc" << ends;
-	iname << fname << ".rst" << ends;
-
-	char buff[255],type[10], *ptr;
-	ifstream in;
-	int cols=0,rows=0,dx,dy;
-
-	in.open(dname.str().c_str());
-	if( !in )
-		{
-		fprintf(stderr, "Cannot open doc file.\n");
-		return 1;
-		}
-	while( !in.eof() )
-		{
-		in.read(buff,255);
-		//in.width(20);
-		//in >> buff
-		ptr =strstr(buff,"columns");
-		if( ptr!=NULL )
-			cols = atoi(ptr+13);
-
-		ptr=strstr(buff,"rows");
-		if( ptr!=NULL )
-			rows = atoi(ptr+13);
-
-		ptr=strstr(buff,"data type");
-		if( ptr!=NULL )
-			{
-			strncpy(type,ptr+14,10);
-			type[9]='\0';
-			}
-		}
-
-	in.close();
-	if( mode == 0 )
-		{
-		if( cols!=DimX || rows!=DimY)
-			return 1;
-		}
-	else
-		{
-		C.resize(cols,rows);
-		DimX=cols;
-		DimY=rows;
-		N = A;
-		}
-
-	int spe=0,maxSpe=0;
-	uchar echa=0;
-
-#ifdef STREAMIO
-	in.open(iname.str(), ios::binary | ios::in );
-
-	if( !in )
-		{
-		cerr << "Cannot open img file.\n";
-		return 1;
-		}
-
-	if( strstr( type,"integer")!=NULL || strstr( type,"byte")!=NULL)
-		{
-		for(dy=0;dy<DimY; dy++)
-			for(dx=0;dx<DimX; dx++)
-			{
-			in.read(&echa,1);
-			spe = echa;
-			if( spe>maxSpe )
-					maxSpe = spe;
-			C(dx,dy).Elem(A) = spe;
-			}
-		}
-	else
-		{
-		cerr << "Cannot read this file type\n";
-		return 1;
-		}
-#else
-	FILE * inn;
-	if ((inn = fopen(iname.str().c_str(), "rb")) == NULL)
-		{
-		fprintf(stderr, "Cannot img file.\n");
-		exit(1);
-		}
-	if( strstr( type,"integer")!=NULL || strstr( type,"byte")!=NULL)
-		{
-		for(dy=0;dy<DimY; dy++)
-			for(dx=0;dx<DimX; dx++)
-			{
-			fread(&echa,1,1,inn);
-			spe = echa;
-			if( spe>maxSpe )
-					maxSpe = spe;
-			C(dx,dy).Elem() = spe;
-			}
-		}
-	else
-		{
-		cerr << "Cannot read this file type\n";
-		return 1;
-		}
-
-
-#endif
-
-	NumSpecies = maxSpe;
-	return 0;
-	}
-
 
