@@ -41,25 +41,32 @@ void IPSPatchStage::Evaluate()
 	{
 	int x,y,i;
     static bool privez=true;
-    double gr1=0,gr2=0;
     if( privez )
     {
+        double gr1=0;
         for(i=0; i<NumSpecies; i++)
-            gr1 = (Sp[i].GrowthRate+Sp[i].ExtinctionRate) > gr1 ? (Sp[i].GrowthRate+Sp[i].ExtinctionRate) : gr1;
+            gr1 = (Sp[i].ExtinctionRate) > gr1 ? (Sp[i].ExtinctionRate) : gr1;
 
         for(i=0; i<NumSpecies; i++)
-            gr2 = (Sp[i].ColonizationRate+Sp[i].PerturbationRate) > gr2 ? (Sp[i].ColonizationRate+Sp[i].PerturbationRate) : gr2;
+            gr1 = (Sp[i].GrowthRate) > gr1 ? (Sp[i].GrowthRate) : gr1;
 
-        GlobalRate = gr1 > gr2 ? gr1 : gr2;
+        for(i=0; i<NumSpecies; i++)
+            gr1 = (Sp[i].ColonizationRate+Sp[i].PerturbationRate) > gr1 ? (Sp[i].ColonizationRate+Sp[i].PerturbationRate) : gr1;
 
+        for(i=0; i<NumSpecies; i++)
+            gr1 = (Sp[i].CompetitionRate) > gr1 ? (Sp[i].CompetitionRate) : gr1;
+
+        GlobalRate = gr1;
+
+        
         for(i=0; i<NumSpecies; i++)
         {
             Sp[i].GrowthRate/=GlobalRate;
             Sp[i].ColonizationRate/=GlobalRate;
             Sp[i].ExtinctionRate/=GlobalRate;
             Sp[i].PerturbationRate/=GlobalRate;
+            Sp[i].CompetitionRate/=GlobalRate;
 
-            Sp[i].GrowthRate+=Sp[i].ExtinctionRate;  // Convert to transition rate
             Sp[i].ColonizationRate+=Sp[i].PerturbationRate;  // Convert to transition rate
 
         }
@@ -97,10 +104,6 @@ void IPSPatchStage::EvalCell(int x,int y)
         {
             if(rnd<Sp[actSp].ExtinctionRate)
                     C(x,y).Specie=0;
-            else if( rnd< Sp[actSp].GrowthRate) // Transition to stage 2
-                    C(x,y).Stage++;
-
-            // FALTA CONTACTO COMPETENCIA ENTRE SMALL PATCHES ESPECIES 
         }
         else
         {
@@ -117,8 +120,28 @@ void IPSPatchStage::EvalCell(int x,int y)
     			dy=Rand(dis*2) - dis ;
                	x1 = (x+ dx + DimX) % DimX;
             	y1 = (y+ dy + DimY) % DimY;
-                if( C(x1,y1).Specie == 0 )
+                int target = C(x1,y1).Specie;
+                if( target == 0 )
                     C(x1,y1).Elem(actSp,0);
+                else if(target == actSp) // If in the position of dispersal there is the same specie 
+                {
+                    if(C(x1,y1).Stage==0 )
+                    {
+                        rnd = Rand()
+                        if(rnd<Sp[actSp].GrowthRate)
+                            C(x1,y1).Stage=1;     // Pass to stage 1
+                    }
+                }
+                else if(target>actSp)       // Specie 1 can replace 2 or 3, specie 2 can Replace 3, specie 3 can't replace any.
+                {
+                    if(C(x1,y1).Stage==0 )
+                    {
+                        rnd = Rand()
+                        if(rnd<Sp[actSp].CompetitionRate)
+                            C(x1,y1).Species=actSp;     // Actual specie replace target specie
+                    }
+
+                }
             }
         }
 	}

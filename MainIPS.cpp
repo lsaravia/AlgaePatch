@@ -106,26 +106,6 @@ int main(int argc, char * argv[])
 					name << p.baseName << (i+1) << ".sed" << ends;
 					ca.SaveSeed( name.str().c_str() );
 					}
-				if( p.patchStat='S' && (i+1)>=p.init)
-					{
-					ostringstream name,nam1;
-					name << p.baseName << "Pat.txt" << ends;
-					nam1 << argv[1] << (i+1) << ends;
-					simplmat <double> dat;
-					ca.Convert(dat);
-					ca.PStats(dat,name.str().c_str(),nam1.str().c_str());
-					}
-				if( p.moranI='S' && (i+1)>=p.init)
-					{
-					ostringstream name,nam1;
-					name << p.baseName << "MI.txt" << ends;
-					nam1 << argv[1] << (i+1) << ends;
-					simplmat <double> dat;
-					ca.Convert(dat);
-					ca.MIStats(dat,name.str().c_str(),nam1.str().c_str());
-					//name.freeze(0);
-					//nam1.freeze(0);
-					}
 				if( p.mfDim='S' && (i+1)>=p.init)
 					{
 					ostringstream name,nam1;
@@ -232,16 +212,6 @@ int ReadParms(char * pFile, IPSParms &p)
    	    else if(buff=="deltaBox") // Delta q para genDim
 	    {
     		parms >> p.deltaBox;
-		}
-   	    else if(buff=="patchStat") // Patch statistics
-	    {
-    		parms >> p.patchStat;
-			p.patchStat = toupper( p.patchStat );
-		}
-   	    else if(buff=="moranI") // Patch statistics
-	    {
-    		parms >> p.moranI;
-			p.patchStat = toupper( p.moranI );
 		}
 		else if( !buff.empty() )
 		{

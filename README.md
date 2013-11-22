@@ -5,27 +5,60 @@
 
 There are 2 kinds of algae (A) patches small (s) and big (b) and 2 species, $A_{1s}$ is a species 1 small patch. Small patches represent a lower algae density than big patches.
 
+First formulation:
+
 $$dE/dt = -k_1 E A_{1b} - k_2 E A_{2b} + u_1 A_{1s} + u_2 A_{2s}$$
-$$dA_{1s}/dt = k_1 E A_{1b} - u_1 A_{1s} - g_1 A_{1s} A_{1b} - c_{12} A_{1s} A_{2b} + p1 A_{1b}$$
-$$dA_{2s}/dt = k_2 E A_{2b} - u_2 A_{2s} - g_2 A_{2s} A_{2b} + c_{12} A_{1s} A_{2b} + p2 A_{2b}$$
+
+$$dA_{1s}/dt = k_1 E A_{1b} - u_1 A_{1s} - g_1 A_{1s} A_{1b} - c_{12} A_{1s} A_{2b} + p_1 A_{1b}$$
+
+$$dA_{2s}/dt = k_2 E A_{2b} - u_2 A_{2s} - g_2 A_{2s} A_{2b} + c_{12} A_{1s} A_{2b} + p_2 A_{2b}$$
+
 $$dA_{1b}/dt = g_1 A_{1s} A_{1b} - p_1 A_{1b}$$
+
 $$dA_{2b}/dt = g_2 A_{2s} A_{2b} - p_2 A_{2b}$$
+
+Second formulation:
+
+$$dA{1s}/dt = k_1 A_{1b} (E - g_1 A_{1s} A_{1b} - c_{12} A_{1s} A_{2b}) + p_1 A_{1b} - u_1 A_{1s}$$
+
 
 ## Stochastic spatial model
 
-The spatial model can have N species. Species *i* replaces species *j* with rate *CompetitionRate* if *i<j*.
-
+The spatial model can have N species. Species *i* replaces species *j* with rate *CompetitionRate* if $i<j$.
+    
 ### Parameters
+
+
+*ColonizationRate*: Big patches disperse colonizers ($p_{i}$)
 
 *GrowthRate*: From small to big patches ($g_{i}$)
 
-*ColonizationRate*: Big patches disperse colonizers ($p_{i}$)
+*CompetitionRate*: Replacement of species $i<j$  ($c_{i}$)
 
 *ExtinctionRate*:Small patch extinction ($u_{i}$)
 
 *PerturbationRate*: Perturbations transform big patches into small ones ($p_{i}$)
 
-*CompetitionRate*: Replacement of species *i<j*  ($c_{i}$)
+
+The events of the model are:
+
+
++-------+--------------+----------------+---------+------------------+
+| Patch |    Event     |     Result     |  Event1 |     Result1      |
++=======+==============+================+=========+==================+
+| Small | Extinction   | Empty          |         |                  |
++-------+--------------+----------------+---------+------------------+
+| Big   | Colonization | Send propagule |         |                  |
++-------+--------------+----------------+---------+------------------+
+|       |              | If empty       |         | small actual spc |
++-------+--------------+----------------+---------+------------------+
+|       |              | If small==spc  | Growth  | Big              |
++-------+--------------+----------------+---------+------------------+
+|       |              | If small>spc   | Compite | Small actual spc |
++-------+--------------+----------------+---------+------------------+
+
+Table:
+
 
 ### Source code
 
