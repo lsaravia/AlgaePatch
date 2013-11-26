@@ -52,7 +52,7 @@ int IPSPatchStage::ReadParms( long rndSeed, char * file )
 	if( !in )
 		{
 		cerr << "Cannot open Parms file.\n";
-		return 1;
+		exit(1);
 		}
 
 	in >> DimX >> DimY;
@@ -60,6 +60,8 @@ int IPSPatchStage::ReadParms( long rndSeed, char * file )
 	in >> NumSpecies;
 
 	Init( NumSpecies, DimX, DimY, rndSeed);
+
+	in.getline(buff,255);
 
 	// Read the species parameters starting at 1 
 	
@@ -96,7 +98,7 @@ void IPSPatchStage::ReadSetSeed(char * file)
 	do
 		{
 
-		if( sscanf(buff,"%i %i %i %i",&sp,&age,&cant,&minx) != 4 || sp>=NumSpecies )
+		if( sscanf(buff,"%i %i %i %i",&sp,&age,&cant,&minx) != 4 || sp>NumSpecies )
 			break;
 		RandomSetSeed(sp,age,cant,minx);
 		}
@@ -242,10 +244,8 @@ void IPSPatchStage::InitGraph(char * idrPal)
 
 void IPSPatchStage::PrintGraph()
 	{
-	char sa, baseName[9];
 	ostringstream name;
 	int sp=0;
-    static bool privez=true;
     
 	for(int i=0; i<DimX; i++)
 		{
@@ -279,7 +279,7 @@ void IPSPatchStage::PrintGraph()
 
 // Distribute species at random. Species index start in 1
 // 
-void IPSPatchStage::RandomSetSeed(int sp,unsigned age, int no, int minX)
+void IPSPatchStage::RandomSetSeed(int sp,unsigned stage, int no, int minX)
 	{
 	int rx,ry;
 	int i;
@@ -292,10 +292,10 @@ void IPSPatchStage::RandomSetSeed(int sp,unsigned age, int no, int minX)
 			else
 				rx=Rand(DimX-1);
 			ry=Rand(DimY-1);
-			if( C(rx,ry).Elem() == 0 )
+			if( C(rx,ry).Specie == 0 )
 				{
-				C(rx,ry).Elem() = sp;
-//				C(rx,ry).Age = age;
+				C(rx,ry).Specie = sp;
+				C(rx,ry).Stage = stage;
 				break;
 				}
 			}
@@ -306,11 +306,11 @@ void IPSPatchStage::RandomSetSeed(int sp,unsigned age, int no, int minX)
 int  IPSPatchStage::PrintDensity(char *fname,char *iname)
 {
 	fstream dout;
-	static bool privez=true;
-	double tot=0,totBio=0,totCells=DimX*DimY,freq=0.0;
+	static bool privez=false;
+	double tot=0.0,totBio=0.0,totCells=DimX*DimY,freq=0.0;
 	simplmat <double> den(NumSpecies+1);
 	simplmat <double> stg(NumSpecies+1);
-	int a,i;
+	unsigned a,i;
 
 	if( fname!=NULL )
 	{
@@ -318,11 +318,11 @@ int  IPSPatchStage::PrintDensity(char *fname,char *iname)
 		name << fname << "Density.txt" << ends;
 		dout.open( name.str().c_str(), ios::in );
 		if( !dout )
-			privez=1;
+			privez=true;
 
 		dout.close();
         dout.clear();
-		dout.open( name.str().c_str(), ios::app );
+		dout.open( name.str().c_str(), ios::out | ios::app );
 		if( !dout )
 		{
 			cerr << "Cannot open density file.\n";
@@ -334,17 +334,20 @@ int  IPSPatchStage::PrintDensity(char *fname,char *iname)
 		cerr << "File name cannot be NULL\n";
 		return 0;		
 	}
-
+	
 	if( privez )
 	{
 		privez=false;
-		dout << "Specie";
+
+		dout << iname <<"\tSpecie";
+
 		for( a=1; a<=NumSpecies; a++)
 			{
 			//dout.width(6);
 			dout <<  "\t" << a;
 			}
 		dout << "\tTot.Dens\tTot.Num" ;
+
 
 		// Proportion of stages (big/total patches)
 		for( a=1; a<=NumSpecies; a++)
@@ -353,10 +356,11 @@ int  IPSPatchStage::PrintDensity(char *fname,char *iname)
 			dout <<  "\t" << a;
 			}
 
-		dout << "\tProp.Big" << endl;
+		dout << "\tStage.Big" << endl;
 		}
 	den.fill(0.0);
 	stg.fill(0.0);
+
 
 	for(i=0; i<DimY; i++)
 		for(int j=0;j<DimX;j++)
@@ -374,6 +378,7 @@ int  IPSPatchStage::PrintDensity(char *fname,char *iname)
 	else
 		dout << iname << "\t" << T ;
 
+
 	for( i=1; i<=NumSpecies; i++)
 		{
 		freq = den(i)/totCells;
@@ -382,6 +387,7 @@ int  IPSPatchStage::PrintDensity(char *fname,char *iname)
 		totBio+= freq;
 		}
 	dout << "\t" << totBio <<  "\t" << tot;
+
 
 	totBio = 0;
 	for( i=1; i<=NumSpecies; i++)
@@ -392,7 +398,9 @@ int  IPSPatchStage::PrintDensity(char *fname,char *iname)
 		}
 	totBio = totBio/tot;
 	dout << "\t" << totBio <<  endl;
+	
 	dout.close();
+	
 	return tot;
 	};
 

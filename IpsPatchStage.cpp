@@ -46,22 +46,22 @@ void IPSPatchStage::Evaluate()
         double gr1=0;
         // Find the maximun rate 
         //
-        for(i=0; i<NumSpecies; i++)
+        for(i=1; i<=NumSpecies; i++)
             gr1 = (Sp[i].ExtinctionRate) > gr1 ? (Sp[i].ExtinctionRate) : gr1;
 
-        for(i=0; i<NumSpecies; i++)
+        for(i=1; i<=NumSpecies; i++)
             gr1 = (Sp[i].GrowthRate) > gr1 ? (Sp[i].GrowthRate) : gr1;
 
-        for(i=0; i<NumSpecies; i++)
+        for(i=1; i<=NumSpecies; i++)
             gr1 = (Sp[i].ColonizationRate+Sp[i].PerturbationRate) > gr1 ? (Sp[i].ColonizationRate+Sp[i].PerturbationRate) : gr1;
 
-        for(i=0; i<NumSpecies; i++)
+        for(i=1; i<=NumSpecies; i++)
             gr1 = (Sp[i].CompetitionRate) > gr1 ? (Sp[i].CompetitionRate) : gr1;
 
         GlobalRate = gr1;
 
         
-        for(i=0; i<NumSpecies; i++)
+        for(i=1; i<=NumSpecies; i++)
         {
             Sp[i].GrowthRate/=GlobalRate;
             Sp[i].ColonizationRate/=GlobalRate;

@@ -9,6 +9,7 @@
 #include <string>
 #include "IpsPatchStage.h"
 #include "bgi.hpp"
+#include "RWFile.h"
 
 using namespace std;
 
@@ -44,18 +45,25 @@ int main(int argc, char * argv[])
 	IPSPatchStage ca;
 
 	if( argc > 1 )
-		{
+	{
 		ReadParms( argv[1], p );
+
 		ca.ReadParms( p.rndSeed, argv[2] );
+
 		if(argc >3 )
-			ca.ReadSetSeed(argv[3]);	// Lee mapa ASCII de las especies y edades
-//			ca.ReadSeed(argv[3]);	// Lee mapa ASCII de las especies y edades
-		}
-	else
 		{
+			if( strstr(argv[3],"sed")!=NULL )
+				ca.ReadSeed(argv[3]);	// Lee mapa ASCII de las especies y edades
+			else if( strstr(argv[3],"set")!=NULL )
+				ca.ReadSetSeed(argv[3]);
+		}
+
+	}
+	else
+	{
 		cerr << "Parameter files missing! (xx.par yy.inp zz.sed)" << endl;
 		exit(1);
-		}
+	}
 
 	int privez=1;
 
@@ -64,11 +72,16 @@ int main(int argc, char * argv[])
 		if( privez )
 			privez = 0;
 		else
-			{
+		{
 			ca.Reset();
 			if( argc>3 )
+			{
+			if( strstr(argv[3],"sed")!=NULL )
 				ca.ReadSeed(argv[3]);	// Lee mapa ASCII de las especies y edades
+			else if( strstr(argv[3],"set")!=NULL )
+				ca.ReadSetSeed(argv[3]);
 			}
+		}
 
 		if( p.gr=='S' )
         {
@@ -78,60 +91,53 @@ int main(int argc, char * argv[])
 
 		int i;
         for(i=0; i<p.nEvals; i++)
-            {
+        {
             if( i == 0 )
-            	{
+            {
        	        if( p.gr=='S' )
                 	ca.PrintGraph();
                 else
    	                cerr << "Initial Conditions \n";
                 if( p.de=='S')
                     ca.PrintDensity( p.baseName, argv[1] );
-                }
+            }
 			ca.Evaluate();
 			if( ((i+1) % p.inter)==0 || i==0 )
-                {
+            {
        	        if( p.gr=='S' )
                 	ca.PrintGraph();
                 else
 					cerr << "Time " << (i+1) << endl;
-					
-				if( p.de=='S' && (i+1)>=p.init)
-                    if( ca.PrintDensity( p.baseName, argv[1] )== 0 )
-                    	break;
-                    	
-				if( p.sa=='S' && (i+1)>=p.init)
+				
+				if( (i+1)>=p.init)
+				{	
+					if( p.de=='S' )
+	                    if( ca.PrintDensity( p.baseName, argv[1] )== 0 )
+	                    	break;
+	                    	
+					if( p.sa=='S')
 					{
-					ostringstream name;
-					name << p.baseName << (i+1) << ".sed" << ends;
-					ca.SaveSeed( name.str().c_str() );
+						ostringstream name;
+						name << p.baseName  << "-" << (i+1) << ".sed" << ends;
+						ca.SaveSeed( name.str().c_str() );
 					}
-				if( p.mfDim=='S' && (i+1)>=p.init)
+					if( p.mfDim=='S')
 					{
-					ostringstream name,nam1;
-					name << p.baseName << "mf.txt" << ends;
-					nam1 << argv[1] << (i+1) << ends;
-					simplmat <double> dat;
-					simplmat <double> q(1);
-					q(0) = 1;
-					ca.Convert(dat);
-					ca.MFStats(dat,q,p.minBox,p.maxBox,p.deltaBox,name.str().c_str(),nam1.str().c_str());
-					//name.freeze(0);
-					//nam1.freeze(0);
+						ostringstream name,nam1;
+						name << p.baseName << "mf.txt" << ends;
+						nam1 << argv[1]  << "-" << (i+1) << ends;
+						simplmat <double> dat;
+						simplmat <double> q(1);
+						q(0) = 1;
+						ca.Convert(dat);
+						ca.MFStats(dat,q,p.minBox,p.maxBox,p.deltaBox,name.str().c_str(),nam1.str().c_str());
 					}
 
-
-                }
+				}
             }
+        }
         if( p.gr=='S' )
         	EGraph();
-/*		if( sa=='S')
-			{
-			ostrstream name;
-			name << baseName << (i) << ".sed" << ends;
-			ca.SaveSeed( name.str() );
-			}
-*/			
 	}
 	return 0;
 }

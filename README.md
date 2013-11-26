@@ -19,7 +19,9 @@ $$dA_{2b}/dt = g_2 A_{2s} A_{2b} - p_2 A_{2b}$$
 
 Second formulation:
 
-$$dA{1s}/dt = k_1 A_{1b} (E - g_1 A_{1s} A_{1b} - c_{12} A_{1s} A_{2b}) + p_1 A_{1b} - u_1 A_{1s}$$
+$$dA_{1s}/dt = k_1 A_{1b} (E - g_1 A_{1s} A_{1b} - c_{12} A_{1s} A_{2b}) + p_1 A_{1b} - u_1 A_{1s}$$
+
+$$dA_{2s}/dt = k_2 A_{2b} (E - g_2 A_{2s} A_{2b} + c_{12} A_{1s} A_{2b}) + p_2 A_{2b} - u_2 A_{2s}$$
 
 
 ## Stochastic spatial model
@@ -62,13 +64,27 @@ Table:
 
 ### Source code
 
-The principal process is in the file IpsPatchStage.cpp the functions:
+The principal process is in the file IpsPatchStage.cpp and the following functions make the principal processes:
 
     IPSPatchStage::Evaluate()
     IPSPatchStage::EvalCell(int x,int y)
 
-make the simulations.
+The file with extension inp have the parameters for the species. The structure line by line is:
 
+1: xdim ydim
+
+2: number of species
+
+3: Parameters of species spreading from this to the following lines
+
+The structure of the lines with species parameters is 
+
+speciesNum GrowthRate ColonizationRate ExtinctionRate PerturbationRate CompetitionRate DispersalDistance 
+
+ 
+### file.set
+
+Specie stage numberofindividuals 0
 
 ## Bibliography
 
