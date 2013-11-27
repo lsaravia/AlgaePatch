@@ -116,12 +116,7 @@ void IPSPatchStage::EvalCell(int x,int y)
             //
             // Dispersal using Euclidean distance, Norm 2
             //
-                dd=Sp[actSp].DispersalDistance;
-        		dx= Rand(dd*2) - dd;
-    			dis=sqrt( static_cast<double>( dd * dd - dx * dx ));
-    			dy=Rand(dis*2) - dis ;
-               	x1 = (x+ dx + DimX) % DimX;
-            	y1 = (y+ dy + DimY) % DimY;
+                ExpDispersal(Sp[actSp].DispersalDistance,x,y,x1,y1);
                 int target = C(x1,y1).Specie;
                 if( target == 0 )
                     C(x1,y1).Elem(actSp,0);

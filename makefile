@@ -19,8 +19,8 @@ I_DIRS=-I.. -I../../fortify -I../../SpatialAnalysis/mfsba -I../../SpatialAnalysi
 
 P_DEFS=-DGRAPHICS -DPERIODIC_BOUNDARY
 
-#CXXFLAGS = -O2 -g -Wall $(I_DIRS) $(X11INCS)  $(SDLDEFS) $(P_DEFS)
-CXXFLAGS = -g -Wall $(I_DIRS) $(X11INCS)  $(SDLDEFS) $(P_DEFS)
+CXXFLAGS = -O2 -Wall $(I_DIRS) $(X11INCS)  $(SDLDEFS) $(P_DEFS)
+#CXXFLAGS = -g -Wall $(I_DIRS) $(X11INCS)  $(SDLDEFS) $(P_DEFS)
 
 L = -lm -lgrx20S -lSDL $(X11LIBS)
 

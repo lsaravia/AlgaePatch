@@ -232,29 +232,39 @@ void IPSPatchStage::InitGraph(char * idrPal)
 	IGraph(DimX,DimY,idrPal);
 	char buff[20];
 
-	for( int i=0; i<=NumSpecies; i++)
+	for( int i=1; i<=NumSpecies; i++)
 	{
-		sprintf(buff,"%d",i);
-		GLabel(buff,i);
-		if(i>10) break;
+		int di= (i*2)-1;
+		sprintf(buff,"%dS0",i);
+		GLabel(buff,di);
+		sprintf(buff,"%dS1",i);
+		GLabel(buff,di+1);
+		if(i>5) break;
 	}
 	
 //  	BLabel();
 }
 
 void IPSPatchStage::PrintGraph()
-	{
+{
 	ostringstream name;
-	int sp=0;
+	int sp=0,st=0,di=0;
     
 	for(int i=0; i<DimX; i++)
-		{
+	{
 		for(int j=0;j<DimY;j++)
+		{
+
+			sp = C(i,j).Specie;
+			if(sp==0) di=0;
+			else
 			{
-			sp = C(i,j).Elem();
-			PPix(i,j,sp);
+				st = C(i,j).Stage;
+				di = (sp*2)-1+st;
 			}
+			PPix(i,j,di);
 		}
+	}
 
 	if( GrKeyPressed() )
 		{
@@ -266,7 +276,7 @@ void IPSPatchStage::PrintGraph()
 			cerr << "Ingrese nombre BASE de archivo : ";
 //			cin.width(6);
 //			cin >> baseName;
-			name << "ipsNeutral" << T << ".sed" << ends;
+			name << "ipsPatch" << T << ".sed" << ends;
 			SaveSeed( name.str().c_str() );
 			InitGraph();
 			}
@@ -274,7 +284,7 @@ void IPSPatchStage::PrintGraph()
 			exit(1);
 			
 		}
-	}
+}
 
 
 // Distribute species at random. Species index start in 1

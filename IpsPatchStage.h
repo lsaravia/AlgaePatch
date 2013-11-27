@@ -88,6 +88,7 @@ class IPSPatchStage : public CABase
 
 	void Evaluate();
 	void EvalCell(int x,int y);
+	void ExpDispersal(const double &dd, const int &x,const int &y,int &x1,int &y1);
 	void Reset();
 
 	void PrintGraph();
@@ -115,5 +116,32 @@ inline int IPSPatchStage::Rand(int num) {
 		return (ran.int64() % (num+1)); // between 0 and num inclusive 
 		//return ignuin(0,num);
         };
+
+
+//   Generate an exponential dispersal function with parameter beta = DispersalDistance
+//   
+inline void IPSPatchStage::ExpDispersal(const double &dd, const int &x,const int &y,int &x1,int &y1)
+{
+	int dx,dy;	
+	double dis;
+	while(true)
+	{
+		double ang;
+		//do ang=Rand(); while(ang==0.0); 
+		dis= -log(Rand())/dd;
+		ang = Rand() * Pi2;
+		dx = cos( ang ) * dis ;
+		dy = sin( ang ) * dis ;
+		if(dx!=0 || dy!=0)
+			break;
+	}
+	x1 = (x+ dx + DimX) % DimX;
+	y1 = (y+ dy + DimY) % DimY;
+	if( x1<0 || y1<0 )
+	{
+		x1= (x1+DimX)% DimX;
+		y1= (y1+DimY)% DimY;
+	}
+}
 
 #endif // __PatchStage_H

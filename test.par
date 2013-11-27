@@ -1,8 +1,8 @@
-gr N
-nRuns 3
-nEvals 50
+gr S
+nRuns 1
+nEvals 500
 rndSeed 11
-inter 1
+inter 10
 init 1
 de S
 sa N
