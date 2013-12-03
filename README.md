@@ -88,6 +88,7 @@ Specie stage numberofindividuals 0
 
 ## Bibliography
 
+1. Quartino ML, Deregibus D, Campana GL, Latorre GEJ, Momo FR (2013) Evidence of Macroalgal Colonization on Newly Ice-Free Areas following Glacial Retreat in Potter Cove (South Shetland Islands), Antarctica. PLoS One 8: e58223. doi:10.1371/journal.pone.0058223.
 
 1. Durrett R, Levin SA (2000) Lessons on Pattern Formation from Planet WATOR. J Theor Biol 205: 201–214. doi:10.1006/jtbi.2000.2061.
 
