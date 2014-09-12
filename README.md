@@ -44,7 +44,6 @@ The spatial model can have N species. Species *i* replaces species *j* with rate
 
 The events of the model are:
 
-
 | Patch |    Event     |     Result     |  Event1 |     Result1      |
 |-------|--------------|----------------|---------|------------------|
 | Small | Extinction   | Empty          |         |                  |
@@ -52,8 +51,6 @@ The events of the model are:
 |       |              | If empty       |         | small actual spc |
 |       |              | If small==spc  | Growth  | Big              |
 |       |              | If small>spc   | Compite | Small actual spc |
-
-Table:
 
 
 ### Source code
@@ -63,7 +60,11 @@ The principal process is in the file IpsPatchStage.cpp and the following functio
     IPSPatchStage::Evaluate()
     IPSPatchStage::EvalCell(int x,int y)
 
-The file with extension inp have the parameters for the species. The structure line by line is:
+### Parameter files
+
+#### inp files
+
+The files with extension **inp** have the parameters for the species. The structure line by line is:
 
 1: xdim ydim
 
@@ -73,12 +74,15 @@ The file with extension inp have the parameters for the species. The structure l
 
 The structure of the lines with species parameters is 
 
-speciesNum GrowthRate ColonizationRate ExtinctionRate PerturbationRate CompetitionRate DispersalDistance 
+    speciesNum GrowthRate ColonizationRate ExtinctionRate PerturbationRate CompetitionRate DispersalDistance 
 
- 
-### file.set
+#### set files
 
-Specie stage numberofindividuals 0
+The files with extension **set** have the number and stages of individuals to set the initial conditions with random spatial distribution, the structure of the file have 4 columns, and can have several lines for different stages:
+
+    Specie stage numberofindividuals 0
+
+
 
 ## Bibliography
 
@@ -89,21 +93,27 @@ Specie stage numberofindividuals 0
 1. Pascual M, Levin SA (1999) Spatial scaling in a benthic population models with density-dependent disturbance. Theor Popul Biol 56: 106–122.
 
 
-License
-=======
+# License
 
-	Copyright 2011 Leonardo A. Saravia
- 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    The MIT License (MIT)
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+    Copyright (c) 2013 Leonardo A. Saravia
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
